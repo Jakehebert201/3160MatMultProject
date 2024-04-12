@@ -1,3 +1,4 @@
-[As of now, this is a project encompassing one of three required programming languages to compute matrix multiplications.]
+As of now, this is a project encompassing one of three required programming languages to compute matrix multiplications.
 
-The first program is done in C using the CUDA libraries to utilize the GPU in matrix calculations- This satisfies the compiled languge requirement of the MatMult project
+The first program is done in C using the CUDA libraries to utilize the GPU in matrix calculations- This satisfies the compiled languge requirement of the MatMult project.
+The program uses NVIDIA's Matrix Multiplication sample as a base to ensure that the GPU is utilized to its fullest
