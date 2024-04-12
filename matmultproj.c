@@ -9,8 +9,8 @@
 #include <errno.h>
 #include "cudamatmult.h"
 
-int main(int argc, char **argsv){
-  
-  
+int main(int argc, char **argsv)
+{
+
   return 0;
 }
