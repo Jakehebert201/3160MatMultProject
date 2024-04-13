@@ -2,3 +2,5 @@ As of now, this is a project encompassing one of three required programming lang
 
 The first program is done in C using the CUDA libraries to utilize the GPU in matrix calculations- This satisfies the compiled languge requirement of the MatMult project.
 The program uses NVIDIA's Matrix Multiplication sample as a base to ensure that the GPU is utilized to its fullest
+
+The "C" folder uses the NVIDIA Mat Mult sample which we will optimize to try to squeeze as much performance out as possible
