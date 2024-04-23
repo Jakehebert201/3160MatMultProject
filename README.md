@@ -60,6 +60,15 @@ Team 3: Brendan Dalhover, Deep Desai, Jacob Hebert, James Letterman, Russell Pay
 ```
 This block of code determines the block size for multiplications, increasing it further allows for higher performance with beefier GPUs
 
+There's a line of code towards the end that allows for manual adjustment
+```c
+    int block_size = 1024; //by default 32
+
+    dim3 dimsA(5 * 2 * block_size, 5 * 2 * block_size, 1);
+    dim3 dimsB(5 * 4 * block_size, 5 * 2 * block_size, 1);
+```
+
+
 
 
     
