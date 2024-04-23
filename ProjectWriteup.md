@@ -7,6 +7,7 @@ Team 3: Brendan Dalhover, Deep Desai, Jacob Hebert, James Letterman, Russell Pay
 >
 >The CUDA toolkit, which includes the nvcc to compile .cu files can be downloaded from NVIDIA’s website: 
 >>https://developer.nvidia.com/cuda-downloads. 
+
 >The test desktop that used the toolkit used version 11.7, as that was what was available on the AUR. The matrix multiplication file is from the Matmult sample in NVIDIA’s cud-samples githup repo:
 >>https://github.com/NVIDIA/cuda-samples/tree/master 
 >
