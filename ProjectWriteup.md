@@ -57,7 +57,7 @@ Optimizations:
     }
   }
 ```
-    This block of code determines the block size for multiplications, increasing it further allows for higher performance with beefier GPUs
+This block of code determines the block size for multiplications, increasing it further allows for higher performance with beefier GPUs
 
 
 ### Results of Optimized Code:
