@@ -19,3 +19,48 @@ Performance= 2658.80 GFlop/s, Time= 51.692 msec, Size= 137438953472 Ops, Workgro
 
 MatrixA(8196,8196), MatrixB(8196,8196)
 Performance= 2680.26 GFlop/s, Time= 410.826 msec, Size= 1101123027072 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(128,128), MatrixB(128,128)
+Performance= 390.72 GFlop/s, Time= 0.011 msec, Size= 4194304 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(128,128), MatrixB(128,128)
+Performance= 403.91 GFlop/s, Time= 0.010 msec, Size= 4194304 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(1024,1024), MatrixB(1024,1024)
+Performance= 2272.81 GFlop/s, Time= 0.945 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(1024,1024), MatrixB(1024,1024)
+Performance= 2713.39 GFlop/s, Time= 0.791 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(1024,1024), MatrixB(1024,1024)
+Performance= 2778.79 GFlop/s, Time= 0.773 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(1024,1024), MatrixB(1024,1024)
+Performance= 2715.02 GFlop/s, Time= 0.791 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(2048,2048), MatrixB(2048,2048)
+Performance= 2892.09 GFlop/s, Time= 5.940 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(2048,2048), MatrixB(2048,2048)
+Performance= 2913.47 GFlop/s, Time= 5.897 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(2048,2048), MatrixB(2048,2048)
+Performance= 2799.53 GFlop/s, Time= 6.137 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(1024,1024), MatrixB(1024,1024)
+Performance= 2719.98 GFlop/s, Time= 0.790 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(1024,1024), MatrixB(1024,1024)
+Performance= 2726.06 GFlop/s, Time= 0.788 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(2048,2048), MatrixB(2048,2048)
+Performance= 2925.54 GFlop/s, Time= 5.872 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(2048,2048), MatrixB(2048,2048)
+Performance= 2908.49 GFlop/s, Time= 5.907 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(2048,2048), MatrixB(2048,2048)
+Performance= 2919.30 GFlop/s, Time= 5.885 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(2048,2048), MatrixB(2048,2048)
+Performance= 2913.39 GFlop/s, Time= 5.897 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block

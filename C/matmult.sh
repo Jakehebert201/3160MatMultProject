@@ -3,7 +3,7 @@
 
 #if args != 1
 if [ "$#" -ne 1 ]; then
-  ech "Usage: $0 MATRIX_SIZE"
+  echo "Usage: $0 MATRIX_SIZE"
   exit 1
 fi 
 
