@@ -57,10 +57,9 @@
  * Matrix multiplication (CUDA Kernel) on the device: C = A * B
  * wA is A's width and wB is B's width
  */
-template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB, int blockSize) {
-    extern __shared__ float sharedMem[];  // Dynamic shared memory
-    float* As = sharedMem;
-    float* Bs = &sharedMem[blockSize * blockSize];
+template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A,
+    float *B, int wA,
+    int wB) {
   // Block index
   int bx = blockIdx.x;
   int by = blockIdx.y;
@@ -133,132 +132,132 @@ template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A, floa
 int MatrixMultiply(int argc, char **argv,
                    int block_size, const dim3 &dimsA,
                    const dim3 &dimsB) {
-    // Allocate host memory for matrices A and B
-    unsigned int size_A = dimsA.x * dimsA.y;
-    unsigned int mem_size_A = sizeof(float) * size_A;
-    float *h_A;
-    checkCudaErrors(cudaMallocHost(&h_A, mem_size_A));
-    unsigned int size_B = dimsB.x * dimsB.y;
-    unsigned int mem_size_B = sizeof(float) * size_B;
-    float *h_B;
-    checkCudaErrors(cudaMallocHost(&h_B, mem_size_B));
+  // Allocate host memory for matrices A and B
+  unsigned int size_A = dimsA.x * dimsA.y;
+  unsigned int mem_size_A = sizeof(float) * size_A;
+  float *h_A;
+  checkCudaErrors(cudaMallocHost(&h_A, mem_size_A));
+  unsigned int size_B = dimsB.x * dimsB.y;
+  unsigned int mem_size_B = sizeof(float) * size_B;
+  float *h_B;
+  checkCudaErrors(cudaMallocHost(&h_B, mem_size_B));
 
-    // Initialize host memory
-    const float valB = 0.01f;
-    ConstantInit(h_A, size_A, 1.0f);
-    ConstantInit(h_B, size_B, valB);
+  // Initialize host memory
+  const float valB = 0.01f;
+  ConstantInit(h_A, size_A, 1.0f);
+  ConstantInit(h_B, size_B, valB);
 
-    // Allocate device memory
-    float *d_A, *d_B, *d_C;
-    unsigned int mem_size_C = dimsB.x * dimsA.y * sizeof(float); // Ensure the allocation size for d_C
-    checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_A), mem_size_A));
-    checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_B), mem_size_B));
-    checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_C), mem_size_C));
+  // Allocate device memory
+  float *d_A, *d_B, *d_C;
+  checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_A), mem_size_A));
+  checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_B), mem_size_B));
 
-    // Allocate host matrix C
-    float *h_C;
-    checkCudaErrors(cudaMallocHost(&h_C, mem_size_C));
+  dim3 dimsC(dimsB.x, dimsA.y, 1);
+  unsigned int mem_size_C = dimsC.x * dimsC.y * sizeof(float);
+  float *h_C;
+  checkCudaErrors(cudaMallocHost(&h_C, mem_size_C));
+  checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_C), mem_size_C));
 
-    // Create multiple streams
-    cudaStream_t stream1, stream2, computeStream;
-    checkCudaErrors(cudaStreamCreateWithFlags(&stream1, cudaStreamNonBlocking));
-    checkCudaErrors(cudaStreamCreateWithFlags(&stream2, cudaStreamNonBlocking));
-    checkCudaErrors(cudaStreamCreateWithFlags(&computeStream, cudaStreamNonBlocking));
+  cudaStream_t stream;
+  checkCudaErrors(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
 
-    // Copy host memory to device asynchronously on separate streams
-    checkCudaErrors(
-        cudaMemcpyAsync(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice, stream1));
-    checkCudaErrors(
-        cudaMemcpyAsync(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice, stream2));
+  // copy host memory to device
+  checkCudaErrors(
+      cudaMemcpyAsync(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice, stream));
+  checkCudaErrors(
+      cudaMemcpyAsync(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice, stream));
 
-    // Initialize cuBLAS context and set the compute stream
+    //Initialize cuBLAS context
     cublasHandle_t handle;
     cublasCreate(&handle);
-    cublasSetMathMode(handle, CUBLAS_TF32_TENSOR_OP_MATH);
-    cublasSetStream(handle, computeStream);
+  // Setup execution parameters
+  float alpha = 1.0f;
+  float beta = 0.0f;
+  dim3 threads(block_size, block_size);
+  dim3 grid((dimsB.x + threads.x - 1) / threads.x, (dimsA.y + threads.y - 1) / threads.y);
 
-    // Ensure data transfers are complete before starting computation
-    cudaStreamSynchronize(stream1);
-    cudaStreamSynchronize(stream2);
+  // Calculate the amount of shared memory needed
+  size_t sharedMemSize = 2 * block_size * block_size * sizeof(float);
 
-    // Setup execution parameters
-    float alpha = 1.0f;
-    float beta = 0.0f;
+  // Create and start timer
+  cudaEvent_t start, stop;
+  checkCudaErrors(cudaEventCreate(&start));
+  checkCudaErrors(cudaEventCreate(&stop));
+  printf("Computing result using CUDA Kernel...\n");
 
-    // Start timing and perform matrix multiplication using cuBLAS on computeStream
-    cudaEvent_t start, stop;
-    checkCudaErrors(cudaEventCreate(&start));
-    checkCudaErrors(cudaEventCreate(&stop));
-    checkCudaErrors(cudaEventRecord(start, computeStream));
+  // Perform warmup operation using matrixMul CUDA kernel
+  MatrixMulCUDA<block_size><<<grid, threads, sharedMemSize, stream>>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+  checkCudaErrors(cudaStreamSynchronize(stream));
 
-    // Call cuBLAS function for matrix multiplication
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 
-                dimsB.x, dimsA.y, dimsA.x, 
-                &alpha, 
-                d_B, dimsB.x, 
-                d_A, dimsA.x, 
-                &beta, 
-                d_C, dimsB.x);
+  // Record the start event
+  checkCudaErrors(cudaEventRecord(start, stream));
 
-    // Stop timing
-    checkCudaErrors(cudaEventRecord(stop, computeStream));
-    checkCudaErrors(cudaEventSynchronize(stop));
+  // Execute the kernel multiple times for averaging the execution time
+  int nIter = 300;
+  for (int j = 0; j < nIter; j++) {
+    MatrixMulCUDA<block_size><<<grid, threads, sharedMemSize, stream>>>(d_C, d_A, d_B, dimsA.x, dimsB.x);
+  }
 
-    float msecTotal = 0.0f;
-    checkCudaErrors(cudaEventElapsedTime(&msecTotal, start, stop));
+  // Record the stop event
+  checkCudaErrors(cudaEventRecord(stop, stream));
 
-    // Compute and print the performance
-    float msecPerMatrixMul = msecTotal;
-    double flopsPerMatrixMul = 2.0 * static_cast<double>(dimsA.x) *
+  // Wait for the stop event to complete
+  checkCudaErrors(cudaEventSynchronize(stop));
+
+  float msecTotal = 0.0f;
+  checkCudaErrors(cudaEventElapsedTime(&msecTotal, start, stop));
+
+  // Compute and print the performance
+  float msecPerMatrixMul = msecTotal / nIter;
+  double flopsPerMatrixMul = 2.0 * static_cast<double>(dimsA.x) *
                              static_cast<double>(dimsA.y) *
                              static_cast<double>(dimsB.x);
-    double gigaFlops =
-        (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
-    printf(
-        "Performance= %.2f GFlop/s, Time= %.3f msec, Size= %.0f Ops,"
-        " WorkgroupSize= %u threads/block\n",
-        gigaFlops, msecPerMatrixMul, flopsPerMatrixMul, block_size * block_size);
+  double gigaFlops =
+      (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
+  printf(
+      "Performance= %.2f GFlop/s, Time= %.3f msec, Size= %.0f Ops,"
+      " WorkgroupSize= %u threads/block\n",
+      gigaFlops, msecPerMatrixMul, flopsPerMatrixMul, threads.x * threads.y);
 
-    // Copy result from device to host on computeStream
-    checkCudaErrors(
-        cudaMemcpyAsync(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost, computeStream));
-    checkCudaErrors(cudaStreamSynchronize(computeStream));
+  // Copy result from device to host
+  checkCudaErrors(
+      cudaMemcpyAsync(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost, stream));
+  checkCudaErrors(cudaStreamSynchronize(stream));
 
-    // Validate and print results
-    printf("Checking computed result for correctness: ");
-    bool correct = true;
-    double eps = 1.e-6;  // machine zero
-    for (int i = 0; i < static_cast<int>(dimsC.x * dimsC.y); i++) {
-        double abs_err = fabs(h_C[i] - (dimsA.x * valB));
-        double dot_length = dimsA.x;
-        double abs_val = fabs(h_C[i]);
-        double rel_err = abs_err / abs_val / dot_length;
-        if (rel_err > eps) {
-            printf("Error! Matrix[%05d]=%.8f, ref=%.8f error term is > %E\n",
-                   i, h_C[i], dimsA.x * valB, eps);
-            correct = false;
-        }
+  // Validate and print results
+  printf("Checking computed result for correctness: ");
+  bool correct = true;
+  double eps = 1.e-6;  // machine zero
+  for (int i = 0; i < static_cast<int>(dimsC.x * dimsC.y); i++) {
+    double abs_err = fabs(h_C[i] - (dimsA.x * valB));
+    double dot_length = dimsA.x;
+    double abs_val = fabs(h_C[i]);
+    double rel_err = abs_err / abs_val / dot_length;
+    if (rel_err > eps) {
+      printf("Error! Matrix[%05d]=%.8f, ref=%.8f error term is > %E\n",
+             i, h_C[i], dimsA.x * valB, eps);
+      correct = false;
     }
-    printf("%s\n", correct ? "Result = PASS" : "Result = FAIL");
+  }
+  printf("%s\n", correct ? "Result = PASS" : "Result = FAIL");
 
-    // Clean up memory and resources
-    cublasDestroy(handle);
-    checkCudaErrors(cudaFreeHost(h_A));
-    checkCudaErrors(cudaFreeHost(h_B));
-    checkCudaErrors(cudaFreeHost(h_C));
-    checkCudaErrors(cudaFree(d_A));
-    checkCudaErrors(cudaFree(d_B));
-    checkCudaErrors(cudaFree(d_C));
-    checkCudaErrors(cudaEventDestroy(start));
-    checkCudaErrors(cudaEventDestroy(stop));
-    checkCudaErrors(cudaStreamDestroy(stream1));
-    checkCudaErrors(cudaStreamDestroy(stream2));
-    checkCudaErrors(cudaStreamDestroy(computeStream));
+  // Clean up memory
+  checkCudaErrors(cudaFreeHost(h_A));
+  checkCudaErrors(cudaFreeHost(h_B));
+  checkCudaErrors(cudaFreeHost(h_C));
+  checkCudaErrors(cudaFree(d_A));
+  checkCudaErrors(cudaFree(d_B));
+  checkCudaErrors(cudaFree(d_C));
+  checkCudaErrors(cudaEventDestroy(start));
+  checkCudaErrors(cudaEventDestroy(stop));
+  checkCudaErrors(cudaStreamDestroy(stream));
 
-    return correct ? EXIT_SUCCESS : EXIT_FAILURE;
+  if (correct) {
+    return EXIT_SUCCESS;
+  } else {
+    return EXIT_FAILURE;
+  }
 }
-
-
 
 
 /**
@@ -282,7 +281,7 @@ int main(int argc, char **argv) {
   // override the device ID based on input provided at the command line
   int dev = findCudaDevice(argc, (const char **)argv);
 
-  int block_size = 32;
+  int block_size = 1024;
 
   dim3 dimsA(5 * 2 * block_size, 5 * 2 * block_size, 1);
   dim3 dimsB(5 * 4 * block_size, 5 * 2 * block_size, 1);

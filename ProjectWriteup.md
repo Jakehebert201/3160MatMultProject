@@ -1,4 +1,5 @@
 CSCI 3160 Matrix Multiplication Project Writeup
+
 Team 3: Brendan Dalhover, Deep Desai, Jacob Hebert, James Letterman, Russell Payne
 
 # C: 
@@ -16,31 +17,36 @@ Team 3: Brendan Dalhover, Deep Desai, Jacob Hebert, James Letterman, Russell Pay
 
 ### Results of the original code:
 ```c
-        MatrixA(128,128), MatrixB(128,128)
-        Performance= 452.11 GFlop/s, Time= 0.009 msec, Size= 4194304 Ops, WorkgroupSize= 1024 threads/block
+MatrixA(64,64), MatrixB(64,64)
+Performance= 95.58 GFlop/s, Time= 0.005 msec, Size= 524288 Ops, WorkgroupSize= 1024 threads/block
 
-        MatrixA(256,256), MatrixB(256,256)
-        Performance= 1959.03 GFlop/s, Time= 0.017 msec, Size= 33554432 Ops, WorkgroupSize= 1024 threads/block
+MatrixA(128,128), MatrixB(128,128)
+Performance= 453.45 GFlop/s, Time= 0.009 msec, Size= 4194304 Ops, WorkgroupSize= 1024 threads/block
 
-        MatrixA(512,512), MatrixB(512,512)
-        Performance= 2175.76 GFlop/s, Time= 0.123 msec, Size= 268435456 Ops, WorkgroupSize= 1024 threads/block
+MatrixA(256,256), MatrixB(256,256)
+Performance= 1628.63 GFlop/s, Time= 0.021 msec, Size= 33554432 Ops, WorkgroupSize= 1024 threads/block
 
-        MatrixA(1024,1024), MatrixB(1024,1024)
-        Performance= 2731.52 GFlop/s, Time= 0.786 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
+MatrixA(512,512), MatrixB(512,512)
+Performance= 1733.29 GFlop/s, Time= 0.155 msec, Size= 268435456 Ops, WorkgroupSize= 1024 threads/block
 
-        MatrixA(2048,2048), MatrixB(2048,2048)
-        Performance= 2844.22 GFlop/s, Time= 6.040 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+MatrixA(1024,1024), MatrixB(1024,1024)
+Performance= 2249.34 GFlop/s, Time= 0.955 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
 
-        MatrixA(4096,4096), MatrixB(4096,4096)
-        Performance= 2658.80 GFlop/s, Time= 51.692 msec, Size= 137438953472 Ops, WorkgroupSize= 1024 threads/block
+MatrixA(2048,2048), MatrixB(2048,2048)
+Performance= 2261.73 GFlop/s, Time= 7.596 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+
+MatrixA(4096,4096), MatrixB(4096,4096)
+Performance= 2123.39 GFlop/s, Time= 64.726 msec, Size= 137438953472 Ops, WorkgroupSize= 1024 threads/block
+
 ```
 
 
 
 We optimized the code:
 
-    Added dynamic memory allocation-
+    -Added dynamic memory allocation
         Allows VRAM to be allocated in a more efficient manner.
+    -Increased Block Size
 
 
 ### Results of Optimized Code:

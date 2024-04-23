@@ -57,10 +57,9 @@
  * Matrix multiplication (CUDA Kernel) on the device: C = A * B
  * wA is A's width and wB is B's width
  */
-template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A, float *B, int wA, int wB, int blockSize) {
-    extern __shared__ float sharedMem[];  // Dynamic shared memory
-    float* As = sharedMem;
-    float* Bs = &sharedMem[blockSize * blockSize];
+template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A,
+    float *B, int wA,
+    int wB) {
   // Block index
   int bx = blockIdx.x;
   int by = blockIdx.y;
@@ -130,7 +129,7 @@ template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A, floa
 /**
  * Run a simple test of matrix multiplication using CUDA
  */
-int MatrixMultiply(int argc, char **argv,
+iint MatrixMultiply(int argc, char **argv,
                    int block_size, const dim3 &dimsA,
                    const dim3 &dimsB) {
     // Allocate host memory for matrices A and B
