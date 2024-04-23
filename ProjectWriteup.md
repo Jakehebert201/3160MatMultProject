@@ -40,7 +40,7 @@ Team 3: Brendan Dalhover, Deep Desai, Jacob Hebert, James Letterman, Russell Pay
 
 ```
 
-Optimizations:
+#### Optimizations:
 
     -Added dynamic memory allocation
         Allows VRAM to be allocated in a more efficient manner.
