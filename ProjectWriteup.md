@@ -60,8 +60,7 @@ Team 3: Brendan Dalhover, Deep Desai, Jacob Hebert, James Letterman, Russell Pay
 This block of code determines the block size for multiplications, increasing it further allows for higher performance with beefier GPUs
 
 
-### Results of Optimized Code:
-    
+
     
 We attempted to utilize Tensor Cores and the lower precision floating point data type TF32 to squeeze more performance out of the program and it was very successful with larger operations!
     To do this we used the cuBLAS library, which uses single-precision point multiplication and the GPU's Tensor Cores.
@@ -89,6 +88,32 @@ We attempted to utilize Tensor Cores and the lower precision floating point data
         MatrixA(4096,4096), MatrixB(4096,4096)
         Performance= 2536.09 GFlop/s, Time= 54.193 msec, Size= 137438953472 Ops, WorkgroupSize= 1024 threads/block
 ```
+
+### Results of Optimized Code:
+```c
+        MatrixA(128,128), MatrixB(128,128)
+        Performance= 455.96 GFlop/s, Time= 0.009 msec, Size= 4194304 Ops, WorkgroupSize= 1024 threads/block
+
+        MatrixA(256,256), MatrixB(256,256)
+        Performance= 1956.30 GFlop/s, Time= 0.017 msec, Size= 33554432 Ops, WorkgroupSize= 1024 threads/block
+
+        MatrixA(512,512), MatrixB(512,512)
+        Performance= 2199.87 GFlop/s, Time= 0.122 msec, Size= 268435456 Ops, WorkgroupSize= 1024 threads/block
+
+        MatrixA(1024,1024), MatrixB(1024,1024)
+        Performance= 2904.07 GFlop/s, Time= 0.739 msec, Size= 2147483648 Ops, WorkgroupSize= 1024 threads/block
+
+        MatrixA(2048,2048), MatrixB(2048,2048)
+        Performance= 2872.19 GFlop/s, Time= 5.981 msec, Size= 17179869184 Ops, WorkgroupSize= 1024 threads/block
+
+        MatrixA(4096,4096), MatrixB(4096,4096)
+        Performance= 2688.05 GFlop/s, Time= 51.130 msec, Size= 137438953472 Ops, WorkgroupSize= 1024 threads/block
+
+
+```
+This implementation is in "matrixMul.cu" in the C folder, all the previous iterations are in the "Unusedmatmults" folder.
+This version does not use the TF32, it just messes with block size.
+Overall, we improved the base speed by 25.5%!
 # Python:
 
 
