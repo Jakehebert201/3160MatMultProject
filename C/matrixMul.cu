@@ -129,7 +129,7 @@ template <int BLOCK_SIZE> __global__ void MatrixMulCUDA(float *C, float *A,
 /**
  * Run a simple test of matrix multiplication using CUDA
  */
-int MatrixMultiply(int argc, char **argv,
+iint MatrixMultiply(int argc, char **argv,
                    int block_size, const dim3 &dimsA,
                    const dim3 &dimsB) {
     // Allocate host memory for matrices A and B
@@ -149,41 +149,48 @@ int MatrixMultiply(int argc, char **argv,
 
     // Allocate device memory
     float *d_A, *d_B, *d_C;
+    unsigned int mem_size_C = dimsB.x * dimsA.y * sizeof(float); // Ensure the allocation size for d_C
     checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_A), mem_size_A));
     checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_B), mem_size_B));
-
-    dim3 dimsC(dimsB.x, dimsA.y, 1);
-    unsigned int mem_size_C = dimsC.x * dimsC.y * sizeof(float);
-    float *h_C;
-    checkCudaErrors(cudaMallocHost(&h_C, mem_size_C));
     checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&d_C), mem_size_C));
 
-    cudaStream_t stream;
-    checkCudaErrors(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
+    // Allocate host matrix C
+    float *h_C;
+    checkCudaErrors(cudaMallocHost(&h_C, mem_size_C));
 
-    // Copy host memory to device
-    checkCudaErrors(
-        cudaMemcpyAsync(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice, stream));
-    checkCudaErrors(
-        cudaMemcpyAsync(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice, stream));
+    // Create multiple streams
+    cudaStream_t stream1, stream2, computeStream;
+    checkCudaErrors(cudaStreamCreateWithFlags(&stream1, cudaStreamNonBlocking));
+    checkCudaErrors(cudaStreamCreateWithFlags(&stream2, cudaStreamNonBlocking));
+    checkCudaErrors(cudaStreamCreateWithFlags(&computeStream, cudaStreamNonBlocking));
 
-    // Initialize cuBLAS context
+    // Copy host memory to device asynchronously on separate streams
+    checkCudaErrors(
+        cudaMemcpyAsync(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice, stream1));
+    checkCudaErrors(
+        cudaMemcpyAsync(d_B, h_B, mem_size_B, cudaMemcpyHostToDevice, stream2));
+
+    // Initialize cuBLAS context and set the compute stream
     cublasHandle_t handle;
     cublasCreate(&handle);
     cublasSetMathMode(handle, CUBLAS_TF32_TENSOR_OP_MATH);
+    cublasSetStream(handle, computeStream);
+
+    // Ensure data transfers are complete before starting computation
+    cudaStreamSynchronize(stream1);
+    cudaStreamSynchronize(stream2);
 
     // Setup execution parameters
     float alpha = 1.0f;
     float beta = 0.0f;
 
-    // Start timing and perform matrix multiplication using cuBLAS
+    // Start timing and perform matrix multiplication using cuBLAS on computeStream
     cudaEvent_t start, stop;
     checkCudaErrors(cudaEventCreate(&start));
     checkCudaErrors(cudaEventCreate(&stop));
-    checkCudaErrors(cudaEventRecord(start, stream));
+    checkCudaErrors(cudaEventRecord(start, computeStream));
 
     // Call cuBLAS function for matrix multiplication
-    cublasSetStream(handle, stream);
     cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 
                 dimsB.x, dimsA.y, dimsA.x, 
                 &alpha, 
@@ -193,7 +200,7 @@ int MatrixMultiply(int argc, char **argv,
                 d_C, dimsB.x);
 
     // Stop timing
-    checkCudaErrors(cudaEventRecord(stop, stream));
+    checkCudaErrors(cudaEventRecord(stop, computeStream));
     checkCudaErrors(cudaEventSynchronize(stop));
 
     float msecTotal = 0.0f;
@@ -211,10 +218,10 @@ int MatrixMultiply(int argc, char **argv,
         " WorkgroupSize= %u threads/block\n",
         gigaFlops, msecPerMatrixMul, flopsPerMatrixMul, block_size * block_size);
 
-    // Copy result from device to host
+    // Copy result from device to host on computeStream
     checkCudaErrors(
-        cudaMemcpyAsync(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost, stream));
-    checkCudaErrors(cudaStreamSynchronize(stream));
+        cudaMemcpyAsync(h_C, d_C, mem_size_C, cudaMemcpyDeviceToHost, computeStream));
+    checkCudaErrors(cudaStreamSynchronize(computeStream));
 
     // Validate and print results
     printf("Checking computed result for correctness: ");
@@ -243,14 +250,13 @@ int MatrixMultiply(int argc, char **argv,
     checkCudaErrors(cudaFree(d_C));
     checkCudaErrors(cudaEventDestroy(start));
     checkCudaErrors(cudaEventDestroy(stop));
-    checkCudaErrors(cudaStreamDestroy(stream));
+    checkCudaErrors(cudaStreamDestroy(stream1));
+    checkCudaErrors(cudaStreamDestroy(stream2));
+    checkCudaErrors(cudaStreamDestroy(computeStream));
 
-    if (correct) {
-        return EXIT_SUCCESS;
-    } else {
-        return EXIT_FAILURE;
-    }
+    return correct ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
 
 
 
