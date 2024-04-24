@@ -1,0 +1,61 @@
+
+CPU MAT MULT for size: 32
+
+UNOPTIMIZED(ms):           0.0
+OPTIMIZED(ms):             0.0
+SPEEDUP:                  -nan
+---------------------------------------
+CPU MAT MULT for size: 64
+
+UNOPTIMIZED(ms):           0.0
+OPTIMIZED(ms):             0.0
+SPEEDUP:                  -nan
+---------------------------------------
+CPU MAT MULT for size: 128
+
+UNOPTIMIZED(ms):           0.0
+OPTIMIZED(ms):             0.0
+SPEEDUP:                  -nan
+---------------------------------------
+CPU MAT MULT for size: 256
+
+UNOPTIMIZED(ms):          50.0
+OPTIMIZED(ms):             0.0
+SPEEDUP:                   inf
+---------------------------------------
+CPU MAT MULT for size: 512
+
+UNOPTIMIZED(ms):         533.0
+OPTIMIZED(ms):            83.0
+SPEEDUP:                   6.4
+---------------------------------------
+CPU MAT MULT for size: 1024
+
+UNOPTIMIZED(ms):        4833.0
+OPTIMIZED(ms):           800.0
+SPEEDUP:                   6.0
+---------------------------------------
+CPU MAT MULT for size: 2048
+
+UNOPTIMIZED(ms):       39984.0
+OPTIMIZED(ms):          6550.0
+SPEEDUP:                   6.1
+---------------------------------------
+CPU MAT MULT for size: 4096
+
+UNOPTIMIZED(ms):      439750.0
+OPTIMIZED(ms):         52466.0
+SPEEDUP:                   8.4
+---------------------------------------
+CPU MAT MULT for size: 8192
+
+UNOPTIMIZED(ms):     3742617.0
+OPTIMIZED(ms):        419484.0
+SPEEDUP:                   8.9
+---------------------------------------
+CPU MAT MULT for size: 16384
+
+UNOPTIMIZED(ms):    46337984.0
+OPTIMIZED(ms):       3376984.0
+SPEEDUP:                  13.7
+---------------------------------------

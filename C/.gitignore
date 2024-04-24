@@ -1,1 +1,4 @@
 /*.o
+/CoptMatmult/*.o
+/CoptMatmult/*.out
+/CoptMatmult/*.delme
