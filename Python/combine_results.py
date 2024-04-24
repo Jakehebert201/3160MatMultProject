@@ -28,16 +28,14 @@ interpreter_results = read_results_csv('interpreter_results.csv')
 cuda_results = read_results_csv('Cuda.csv')
 numpy_opt_results = read_results_csv('numpy_OPT_results.csv')
 optimized_results = read_results_csv('optimized_results.csv')
-java_results = read_results_csv('Java.csv')
-more_results = read_results_csv('more.csv')
 
 # Plotting combined results
 def plot_combined_results():
     fig_combined, ax_combined = plt.subplots()
 
-    for results, title, color in zip([interpreter_results, optimized_results, numpy_results, numpy_opt_results, java_results, more_results, cuda_results],
-                                     ['Interpreter Results', 'Optimized Results', 'NumPy Results', 'NumPy Optimized Results', 'Java Results', 'More Results', 'Cuda Results'],
-                                     ['orange', 'purple', 'blue', 'red', 'brown', 'magenta', 'green']):
+    for results, title, color in zip([interpreter_results, optimized_results, numpy_results, numpy_opt_results, cuda_results],
+                                     ['Interpreter Results', 'Optimized Results', 'NumPy Results', 'NumPy Optimized Results', 'Cuda Results'],
+                                     ['orange', 'purple', 'blue', 'red', 'green']):
         sizes, times = zip(*[(size, time) for size, _, _, time in results])
         ax_combined.plot(sizes, times, linestyle='-', marker='o', label=title, color=color)
 
@@ -51,13 +49,13 @@ def plot_combined_results():
 
 
 # Plotting individual results without the blank subplot
-fig_individual, axs_individual = plt.subplots(4, 2, figsize=(15, 15))
+fig_individual, axs_individual = plt.subplots(3, 2, figsize=(15, 15))
 
 # Adjusting vertical spacing between subplots
 plt.subplots_adjust(hspace=0.5)
 
 # Colors for individual graphs
-colors = ['orange', 'purple', 'blue', 'red', 'brown', 'magenta', 'green']
+colors = ['orange', 'purple', 'blue', 'red', 'green']
 
 # Plotting Interpreter and Optimized graphs side-by-side
 for results, title, color, ax in zip([interpreter_results, optimized_results],
@@ -99,32 +97,12 @@ for results, title, color, ax in zip([numpy_results, numpy_opt_results],
     ax.legend()
     ax.grid(True)
 
-# Plotting Java and More graphs side-by-side
-for results, title, color, ax in zip([java_results, more_results],
-                                     ['Java Results', 'More Results'],
-                                     ['brown', 'magenta'],
-                                     axs_individual[2, :]):
-    data_dict = {}
-    for (size, a_val, b_val, time) in results:
-        if (a_val, b_val) not in data_dict:
-            data_dict[(a_val, b_val)] = ([], [])
-        data_dict[(a_val, b_val)][0].append(size)
-        data_dict[(a_val, b_val)][1].append(time)
-    for (a_val, b_val), (sizes, times) in data_dict.items():
-        if len(sizes) >= 2:
-            ax.plot(sizes, times, linestyle='-', marker='o', label=title, color=color)
-    ax.set_xlabel('Matrix Size')
-    ax.set_ylabel('Execution Time (milliseconds)')
-    ax.set_title(title)
-    ax.legend()
-    ax.grid(True)
-
-# Centering the Cuda Results graph
-axs_individual[3, 0].remove()  # Remove the empty subplot
-axs_individual[3, 1].remove()  # Remove the empty subplot
+# Remove the empty subplots in the third row
+axs_individual[2, 0].remove()
+axs_individual[2, 1].remove()
 
 # Determine the position for Cuda Results
-ax = fig_individual.add_subplot(4, 2, (7, 8))  # Adjusted position to cover two columns and be centered vertically
+ax = fig_individual.add_subplot(3, 2, (5, 6))  # Adjusted position to cover two columns and be centered vertically
 
 sizes, times = zip(*[(size, time) for size, _, _, time in cuda_results])
 ax.plot(sizes, times, linestyle='-', marker='o', label='Cuda Results', color='green')
@@ -133,10 +111,6 @@ ax.set_ylabel('Execution Time (milliseconds)')
 ax.set_title('Cuda Results')
 ax.legend()
 ax.grid(True)
-
-# Adjust layout to ensure correct spacing
-plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjusted to avoid covering the bottom margin
-
 
 
 # Display the plots and tables in a single window with tabs
@@ -170,8 +144,6 @@ tables = [
     (optimized_results, 'Optimized Results'),
     (numpy_results, 'NumPy Results'),
     (numpy_opt_results, 'NumPy Optimized Results'),
-    (java_results, 'Java Results'),
-    (more_results, 'More Results'),
     (cuda_results, 'Cuda Results')
 ]
 
@@ -186,6 +158,7 @@ for i in range(0, len(tables), 2):
             table_text.pack(side=tk.LEFT, fill='both', expand=True)
             table_data = tabulate([["", size, round(a_val, 4), round(b_val, 4), round(time, 4)] for (size, a_val, b_val, time) in results], headers=["", "Size", "A Value", "B Value", "Execution Time (milliseconds)"], tablefmt='pretty')
             table_text.insert(tk.END, title + '\n\n' + table_data)
+
 
 notebook.pack(expand=True, fill='both')
 
