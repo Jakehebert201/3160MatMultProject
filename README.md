@@ -128,6 +128,5 @@ Overall, we improved the base speed by 25.5%!
 
 
 # Java:
-
-
+This implementation had a naive matrix multiplication aswell as a loop unrolled version to be more optimized. I focused on JIT to test how effective it can be at different ranges.
 
