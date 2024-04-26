@@ -125,7 +125,46 @@ This implementation is in "matrixMul.cu" in the C folder, all the previous itera
 This version does not use the TF32, it just messes with block size.
 Overall, we improved the base speed by 25.5%!
 # Python:
+This implementation had four iterations: Base Python, Slightly Optimized Base Python, Numpy, Slightly Optimized Numpy. Below are the outputs of each of the tests in csvs format. 
 
+```
+STRING_LABEL,Size,A Value,B Value,Execution Time (milliseconds)
+INTERPRETER_UNOPT,128,1,1,99.80201721191406
+INTERPRETER_UNOPT,256,1,1,804.1632175445557
+INTERPRETER_UNOPT,512,1,1,7192.05117225647
+INTERPRETER_UNOPT,1024,1,1,64153.44786643982
+INTERPRETER_UNOPT,2048,1,1,536228.2063961029
+```
+
+```
+STRING_LABEL,Size,A Value,B Value,Execution Time (milliseconds)
+INTERPRETER_OPT,128,1,1,69.48280334472656
+INTERPRETER_OPT,256,1,1,519.0598964691162
+INTERPRETER_OPT,512,1,1,4933.332920074463
+INTERPRETER_OPT,1024,1,1,44637.27378845215
+INTERPRETER_OPT,2048,1,1,377366.8270111084
+```
+
+```
+STRING_LABEL,Size,A Value,B Value,Execution Time (milliseconds)
+NUMPY_UNOPT,128,1,1.0,1.5020370483398438
+NUMPY_UNOPT,256,1,1.0,2.515077590942383
+NUMPY_UNOPT,512,1,1.0,2.000093460083008
+NUMPY_UNOPT,1024,1,1.0,6.001710891723633
+NUMPY_UNOPT,2048,1,1.0,37.08314895629883
+```
+
+```
+STRING_LABEL,Size,A Value,B Value,Execution Time (milliseconds)
+NUMPY_OPT,128,1,1.0,0.5004405975341797
+NUMPY_OPT,256,1,1.0,0.49996376037597656
+NUMPY_OPT,512,1,1.0,0.9996891021728516
+NUMPY_OPT,1024,1,1.0,5.082130432128906
+NUMPY_OPT,2048,1,1.0,29.539108276367188
+```
+Also with Python, we combined all other tests and displayed sizes, execution times, etc. using MathPlotLib, Tkinter, Tabulate. 
+All of the python files with a '1' end, output a csv which the combine_results.py take in to display the times as graphs and tables.
+All python files not ending in '1' independently run displaying a table and graph with different A and B values. 
 
 # Java:
 This implementation had a naive matrix multiplication aswell as a loop unrolled version to be more optimized. I focused on JIT to test how effective it can be at different ranges.
